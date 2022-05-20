@@ -1,0 +1,60 @@
+name: Scheduled Loadtest
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Do a run every sunday night
+    - cron: 12 5 * * 0
+
+jobs:
+  loadtest:
+    name: "Load-Test (Production)"
+    runs-on: ubuntu-latest
+    env:
+      STORMFORGER_JWT: ${{ secrets.STORMFORGER_JWT }}
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    # Note: we need to manually extract the repository name (w/o the orga),
+    # since the github scheduled event does not bring the repository subobject.
+    - name: StormForger | Setup variables
+      id: config
+      run: |
+        repo=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+        echo "::set-output name=repository::${repo}"
+        echo "::set-output name=target_env::production"
+
+    - name: StormForger | Install forge CLI
+      run: |
+        wget https://app.stormforger.com/download/cli/linux -O forge_linux_amd64.tar.gz
+        tar -xzf forge_linux_amd64.tar.gz
+        ./forge ping
+
+    - name: StormForger | Upload data-sources
+      run: |
+        ./scripts/data-source.sh "${TARGET_ENV}" # export test-data
+        ./forge datasource push demo *.csv --name-prefix-path="${DATASOURCE_PREFIX}" --auto-field-names
+      env:
+        DATASOURCE_PREFIX: "${{steps.config.outputs.repository}}"
+        TARGET_ENV: "${{steps.config.outputs.target_env}}"
+
+    - name: StormForger | Launch test-run
+      run: |
+        ./forge test-case launch "${TESTCASE}" --test-case-file="loadtest/loadtest.mjs" \
+          --define ENV=\"${TARGET_ENV}\" \
+          --title="${TITLE}" --notes="${NOTES}" \
+          --label="git-ref=${{github.ref}}" \
+          --label="gh-commit=${{github.event.head_commit.url}}" \
+          --label="gh-workflow=${{github.workflow}}" \
+          --label="gh-run-url=https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" \
+          --label="gh-actor=${{github.actor}}" \
+            ${LAUNCH_ARGS}
+      env:
+        TARGET_ENV: "${{steps.config.outputs.target_env}}"
+        TESTCASE: "demo/${{steps.config.outputs.repository}}-${{steps.config.outputs.target_env}}"
+        LAUNCH_ARGS: "--nfr-check-file=./loadtest/loadtest.nfr.yaml"
+        NOTES: |
+          Head Commit Message:
+          ${{github.event.head_commit.message}}
+        TITLE: "${{github.workflow}}#${{github.run_number}} (${{github.ref}})"

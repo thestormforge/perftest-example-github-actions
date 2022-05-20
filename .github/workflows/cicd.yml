@@ -1,0 +1,123 @@
+name: CI/CD
+
+on: push
+
+env:
+  # rewrite go env GOCACHE to something well known so we can use actions/cache with it
+  GOCACHE: "/home/runner/go/cache"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go 1.15
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/go/src
+          /hone/runner/go/cache
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Print Go Version
+      run: go version
+
+    - name: Build
+      run: go build -mod=readonly -v .
+
+  test:
+    name: "Test"
+    needs: [build]
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENV: "staging"
+      TESTCASE: "demo/${{ github.event.repository.name }}-staging"
+      STORMFORGE_CLIENT_ID: ${{ secrets.STORMFORGE_CLIENT_ID }}
+      STORMFORGE_CLIENT_SECRET: ${{ secrets.STORMFORGE_CLIENT_SECRET }}
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: StormForger | Install forge CLI
+      run: |
+        # wget https://app.stormforger.com/download/cli/linux -O forge_linux_amd64.tar.gz
+        # tar -xzf forge_linux_amd64.tar.gz
+        ./stormforge ping
+
+    - name: StormForger | Upload data-sources
+      run: |
+        ./scripts/data-source.sh "${TARGET_ENV}" # export test-data
+        ./stormforge create data-source --from-file *.csv --name-prefix-path="${{ github.event.repository.name }}/${TARGET_ENV}/" --auto-field-names
+
+    - name: StormForger | Launch test-run
+      run: |
+        ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
+          --define ENV=\"${TARGET_ENV}\" \
+          --title="${TITLE}" \
+          --notes="${NOTES}" \
+          --label="git-ref=${{github.ref}}" \
+          --label="gh-commit=${{github.event.head_commit.url}}" \
+          --label="gh-workflow=${{github.workflow}}" \
+          --label="gh-run-url=https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" \
+          --label="gh-actor=${{github.actor}}" \
+          ${LAUNCH_ARGS}
+      env:
+        LAUNCH_ARGS: "--validate"
+        NOTES: |
+          Head Commit Message:
+          ${{github.event.head_commit.message}}
+        TITLE: "${{github.workflow}}#${{github.run_number}} (${{github.ref}})"
+
+  deploy:
+    name: "Deploy (Production)"
+    needs: [test]
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENV: "production"
+      TESTCASE: "demo/${{ github.event.repository.name }}-production"
+      STORMFORGE_CLIENT_ID: ${{ secrets.STORMFORGE_CLIENT_ID }}
+      STORMFORGE_CLIENT_SECRET: ${{ secrets.STORMFORGE_CLIENT_SECRET }}
+    # run the deploy pipeline on master only
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    - name: StormForger | Install forge CLI
+      run: |
+        # wget https://app.stormforger.com/download/cli/linux -O forge_linux_amd64.tar.gz
+        # tar -xzf forge_linux_amd64.tar.gz
+        ./stormforge ping
+
+    - name: StormForger | Upload data-sources
+      run: |
+        ./scripts/data-source.sh "${TARGET_ENV}" # export test-data
+        ./stormforge create data-source --from-file *.csv --name-prefix-path="${{ github.event.repository.name }}/${TARGET_ENV}/" --auto-field-names
+
+    - name: StormForger | Launch test-run
+      run: |
+        ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
+          --define ENV=\"${TARGET_ENV}\" \
+          --title="${TITLE}" \
+          --notes="${NOTES}" \
+          --label="git-ref=${{github.ref}}" \
+          --label="gh-commit=${{github.event.head_commit.url}}" \
+          --label="gh-workflow=${{github.workflow}}" \
+          --label="gh-run-url=https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" \
+          --label="gh-actor=${{github.actor}}" \
+          ${LAUNCH_ARGS}
+      env:
+        LAUNCH_ARGS: "--nfr-check-file=./loadtest/loadtest.nfr.yaml"
+        NOTES: |
+          Head Commit Message:
+          ${{github.event.head_commit.message}}
+        TITLE: "${{github.workflow}}#${{github.run_number}} (${{github.ref}})"
