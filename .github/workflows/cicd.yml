@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TARGET_ENV: "staging"
-      TESTCASE: "demo/${{ github.event.repository.name }}-staging"
+      TESTCASE: "${{ github.event.repository.name }}-staging"
       STORMFORGE_CLIENT_ID: ${{ secrets.STORMFORGE_CLIENT_ID }}
       STORMFORGE_CLIENT_SECRET: ${{ secrets.STORMFORGE_CLIENT_SECRET }}
     steps:
