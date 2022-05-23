@@ -61,7 +61,7 @@ jobs:
 
     - name: StormForger | Launch test-run
       run: |
-        ./stormforge create test-case "${TESTCASE}" --from-file="/loadtest/loadtest.mjs"
+        ./stormforge create test-case "${TESTCASE}" --from-file="loadtest/loadtest.mjs"
         ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
           --define ENV=\"${TARGET_ENV}\" \
           --title="${TITLE}" \
@@ -106,7 +106,7 @@ jobs:
 
     - name: StormForger | Launch test-run
       run: |
-        ./stormforge create test-case "${TESTCASE}" --from-file="/loadtest/loadtest.mjs"
+        ./stormforge create test-case "${TESTCASE}" --from-file="loadtest/loadtest.mjs"
         ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
           --define ENV=\"${TARGET_ENV}\" \
           --title="${TITLE}" \
