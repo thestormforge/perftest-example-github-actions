@@ -61,6 +61,7 @@ jobs:
 
     - name: StormForger | Launch test-run
       run: |
+        ./stormforge create test-case "${TESTCASE}" --from-file="/loadtest/loadtest.mjs"
         ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
           --define ENV=\"${TARGET_ENV}\" \
           --title="${TITLE}" \
@@ -84,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TARGET_ENV: "production"
-      TESTCASE: "demo/${{ github.event.repository.name }}-production"
+      TESTCASE: "${{ github.event.repository.name }}-production"
       STORMFORGE_CLIENT_ID: ${{ secrets.STORMFORGE_CLIENT_ID }}
       STORMFORGE_CLIENT_SECRET: ${{ secrets.STORMFORGE_CLIENT_SECRET }}
     # run the deploy pipeline on master only
@@ -105,6 +106,7 @@ jobs:
 
     - name: StormForger | Launch test-run
       run: |
+        ./stormforge create test-case "${TESTCASE}" --from-file="/loadtest/loadtest.mjs"
         ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
           --define ENV=\"${TARGET_ENV}\" \
           --title="${TITLE}" \
