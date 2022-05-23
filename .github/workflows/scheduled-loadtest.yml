@@ -11,7 +11,8 @@ jobs:
     name: "Load-Test (Production)"
     runs-on: ubuntu-latest
     env:
-      STORMFORGER_JWT: ${{ secrets.STORMFORGER_JWT }}
+      STORMFORGE_CLIENT_ID: ${{ secrets.STORMFORGE_CLIENT_ID }}
+      STORMFORGE_CLIENT_SECRET: ${{ secrets.STORMFORGE_CLIENT_SECRET }}
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
@@ -27,21 +28,21 @@ jobs:
 
     - name: StormForger | Install forge CLI
       run: |
-        wget https://app.stormforger.com/download/cli/linux -O forge_linux_amd64.tar.gz
-        tar -xzf forge_linux_amd64.tar.gz
-        ./forge ping
+        # wget https://app.stormforger.com/download/cli/linux -O forge_linux_amd64.tar.gz
+        # tar -xzf forge_linux_amd64.tar.gz
+        ./stormforge ping
 
     - name: StormForger | Upload data-sources
       run: |
         ./scripts/data-source.sh "${TARGET_ENV}" # export test-data
-        ./forge datasource push demo *.csv --name-prefix-path="${DATASOURCE_PREFIX}" --auto-field-names
+        ./stormforge create data-source --from-file *.csv --name-prefix-path="${{ github.event.repository.name }}/${TARGET_ENV}/" --auto-field-names
       env:
         DATASOURCE_PREFIX: "${{steps.config.outputs.repository}}"
         TARGET_ENV: "${{steps.config.outputs.target_env}}"
 
     - name: StormForger | Launch test-run
       run: |
-        ./forge test-case launch "${TESTCASE}" --test-case-file="loadtest/loadtest.mjs" \
+        ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
           --define ENV=\"${TARGET_ENV}\" \
           --title="${TITLE}" --notes="${NOTES}" \
           --label="git-ref=${{github.ref}}" \
@@ -49,10 +50,10 @@ jobs:
           --label="gh-workflow=${{github.workflow}}" \
           --label="gh-run-url=https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" \
           --label="gh-actor=${{github.actor}}" \
-            ${LAUNCH_ARGS}
+          ${LAUNCH_ARGS}
       env:
         TARGET_ENV: "${{steps.config.outputs.target_env}}"
-        TESTCASE: "demo/${{steps.config.outputs.repository}}-${{steps.config.outputs.target_env}}"
+        TESTCASE: "${{steps.config.outputs.repository}}-${{steps.config.outputs.target_env}}"
         LAUNCH_ARGS: "--nfr-check-file=./loadtest/loadtest.nfr.yaml"
         NOTES: |
           Head Commit Message:
