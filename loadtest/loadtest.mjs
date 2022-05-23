@@ -9,12 +9,12 @@ var config;
 // Define the target environment via --define ENV=\"staging\"
 if (ENV == "staging") {
   config = {
-    dsPrefix: "example-github-actions/staging/",
+    dsPrefix: "perftest-example-github-actions/staging/",
     host: "http://testapp.loadtest.party:9001",
   }
 } else if (ENV == "production") {
   config = {
-    dsPrefix: "example-github-actions/production/",
+    dsPrefix: "perftest-example-github-actions/production/",
     host: "https://testapp.loadtest.party",
   }
 } else {
