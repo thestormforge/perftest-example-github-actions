@@ -87,8 +87,8 @@ jobs:
       TESTCASE: "${{ github.event.repository.name }}-production"
       STORMFORGE_CLIENT_ID: ${{ secrets.STORMFORGE_CLIENT_ID }}
       STORMFORGE_CLIENT_SECRET: ${{ secrets.STORMFORGE_CLIENT_SECRET }}
-    # run the deploy pipeline on master only
-    if: github.ref == 'refs/heads/master'
+    # run the deploy pipeline on main only
+    if: github.ref == 'refs/heads/main'
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
