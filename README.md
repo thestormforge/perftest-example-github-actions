@@ -1,4 +1,4 @@
-# example-github-actions
+# Performance Test Example GitHub Actions
 
 This repository is intended a living example how to use StormForger with GitHub Actions. A guide is a available at [https://docs.stormforge.io/perftest/guides/github-actions/](https://docs.stormforge.io/perftest/guides/github-actions/).
 
