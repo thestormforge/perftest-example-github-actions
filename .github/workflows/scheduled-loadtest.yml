@@ -28,8 +28,8 @@ jobs:
 
     - name: StormForger | Install forge CLI
       run: |
-        # wget https://app.stormforger.com/download/cli/linux -O forge_linux_amd64.tar.gz
-        # tar -xzf forge_linux_amd64.tar.gz
+        wget https://downloads.stormforge.io/stormforge-cli/v3.0.0-beta.1/stormforge_3.0.0-beta.1_linux_amd64.tar.gz -O stormforge_linux_amd64.tar.gz
+        tar -xzf stormforge_linux_amd64.tar.gz
         ./stormforge ping
 
     - name: StormForger | Upload data-sources
