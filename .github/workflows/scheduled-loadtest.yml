@@ -11,8 +11,8 @@ jobs:
     name: "Load-Test (Production)"
     runs-on: ubuntu-latest
     env:
-      STORMFORGE_CLIENT_ID: ${{ secrets.STORMFORGE_CLIENT_ID }}
-      STORMFORGE_CLIENT_SECRET: ${{ secrets.STORMFORGE_CLIENT_SECRET }}
+      STORMFORGE_TOKEN: ${{ secrets.STORMFORGE_TOKEN }}
+      ENABLE_PERFTEST_PREVIEW_COMMANDS: "true" # TODO: remove when the perftest commands officially go live.
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
