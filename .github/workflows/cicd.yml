@@ -42,8 +42,8 @@ jobs:
     env:
       TARGET_ENV: "staging"
       TESTCASE: "${{ github.event.repository.name }}-staging"
-      STORMFORGE_CLIENT_ID: ${{ secrets.STORMFORGE_CLIENT_ID }}
-      STORMFORGE_CLIENT_SECRET: ${{ secrets.STORMFORGE_CLIENT_SECRET }}
+      STORMFORGE_TOKEN: ${{ secrets.STORMFORGE_TOKEN }}
+      ENABLE_PERFTEST_PREVIEW_COMMANDS: "true"
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
