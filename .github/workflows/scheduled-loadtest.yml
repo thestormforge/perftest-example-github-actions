@@ -23,8 +23,8 @@ jobs:
       id: config
       run: |
         repo=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-        echo "::set-output name=repository::${repo}"
-        echo "::set-output name=target_env::production"
+        echo "repository=${repo}" >> "$GITHUB_OUTPUT"
+        echo "target_env=production" >> "$GITHUB_OUTPUT"
 
     - name: StormForger | Install forge CLI
       run: |
