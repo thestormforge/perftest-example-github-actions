@@ -47,18 +47,18 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name: StormForger | Install forge CLI
+    - name: StormForge | Install forge CLI
       run: |
         wget https://downloads.stormforge.io/stormforge-cli/latest/stormforge_linux_amd64.tar.gz -O stormforge_linux_amd64.tar.gz
         tar -xzf stormforge_linux_amd64.tar.gz
         ./stormforge ping
 
-    - name: StormForger | Upload data-sources
+    - name: StormForge | Upload data-sources
       run: |
         ./scripts/data-source.sh "${TARGET_ENV}" # export test-data
         ./stormforge create data-source --from-file *.csv --name-prefix-path="${{ github.event.repository.name }}/${TARGET_ENV}/" --auto-field-names
 
-    - name: StormForger | Launch test-run
+    - name: StormForge | Launch test-run
       run: |
         ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
           --define ENV=\"${TARGET_ENV}\" \
@@ -90,18 +90,18 @@ jobs:
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-    - name: StormForger | Install forge CLI
+    - name: StormForge | Install forge CLI
       run: |
         wget https://downloads.stormforge.io/stormforge-cli/latest/stormforge_linux_amd64.tar.gz -O stormforge_linux_amd64.tar.gz
         tar -xzf stormforge_linux_amd64.tar.gz
         ./stormforge ping
 
-    - name: StormForger | Upload data-sources
+    - name: StormForge | Upload data-sources
       run: |
         ./scripts/data-source.sh "${TARGET_ENV}" # export test-data
         ./stormforge create data-source --from-file *.csv --name-prefix-path="${{ github.event.repository.name }}/${TARGET_ENV}/" --auto-field-names
 
-    - name: StormForger | Launch test-run
+    - name: StormForge | Launch test-run
       run: |
         ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
           --define ENV=\"${TARGET_ENV}\" \

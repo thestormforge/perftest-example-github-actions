@@ -18,20 +18,20 @@ jobs:
 
     # Note: we need to manually extract the repository name (w/o the orga),
     # since the github scheduled event does not bring the repository subobject.
-    - name: StormForger | Setup variables
+    - name: StormForge | Setup variables
       id: config
       run: |
         repo=$(echo "${{ github.repository }}" | cut -d'/' -f2)
         echo "repository=${repo}" >> "$GITHUB_OUTPUT"
         echo "target_env=production" >> "$GITHUB_OUTPUT"
 
-    - name: StormForger | Install forge CLI
+    - name: StormForge | Install forge CLI
       run: |
         wget https://downloads.stormforge.io/stormforge-cli/latest/stormforge_linux_amd64.tar.gz -O stormforge_linux_amd64.tar.gz
         tar -xzf stormforge_linux_amd64.tar.gz
         ./stormforge ping
 
-    - name: StormForger | Upload data-sources
+    - name: StormForge | Upload data-sources
       run: |
         ./scripts/data-source.sh "${TARGET_ENV}" # export test-data
         ./stormforge create data-source --from-file *.csv --name-prefix-path="${{ github.event.repository.name }}/${TARGET_ENV}/" --auto-field-names
@@ -39,7 +39,7 @@ jobs:
         DATASOURCE_PREFIX: "${{steps.config.outputs.repository}}"
         TARGET_ENV: "${{steps.config.outputs.target_env}}"
 
-    - name: StormForger | Launch test-run
+    - name: StormForge | Launch test-run
       run: |
         ./stormforge create test-run --test-case  "${TESTCASE}" --from-file="loadtest/loadtest.mjs" \
           --define ENV=\"${TARGET_ENV}\" \

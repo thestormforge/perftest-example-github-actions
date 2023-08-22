@@ -1,7 +1,7 @@
 /*
  * NOTICE: DO NOT EDIT!
  *
- * This file is managed via https://github.com/stormforger/example-github-actions/
+ * This file is managed via https://github.com/thestormforge/perftest-example-github-actions
  */
 
 var config;

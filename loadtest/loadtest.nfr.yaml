@@ -1,5 +1,5 @@
 # This file defines non-function requirements for the load-test.
-# The documentation is available at https://docs.stormforger.com/reference/nfr/
+# The documentation is available at https://docs.stormforge.io/perftest/reference/nfr/
 version: "0.1"
 requirements:
 # require the test-run to finish successfully
